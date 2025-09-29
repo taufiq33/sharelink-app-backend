@@ -3,6 +3,9 @@ import dotenv from "dotenv";
 import morgan from "morgan";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+
+import DB from "./src/config/database.js";
+
 dotenv.config();
 
 const app = e();
@@ -19,4 +22,10 @@ app.use(
 
 app.listen(3300, async () => {
   console.log("server running port 3300");
+  try {
+    await DB.authenticate();
+    console.log("Db connected");
+  } catch (error) {
+    console.log(error);
+  }
 });
