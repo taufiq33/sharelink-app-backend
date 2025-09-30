@@ -5,6 +5,8 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 
 import DB from "./src/config/database.js";
+import { authRouter } from "./src/router/authRouter.js";
+import { ErrorHandlerMiddleware } from "./src/middleware/errorHandlerMiddleware.js";
 
 dotenv.config();
 
@@ -20,12 +22,9 @@ app.use(
   })
 );
 
-app.use((error, request, response, _next) => {
-  response.status(error?.status || 500).json({
-    name: error?.name || "internal Error",
-    message: error?.message || "internal error",
-  });
-});
+app.use("/auth", authRouter);
+
+app.use(ErrorHandlerMiddleware);
 
 app.listen(3300, async () => {
   console.log("server running port 3300");

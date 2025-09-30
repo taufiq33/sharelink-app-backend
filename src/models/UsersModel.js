@@ -26,11 +26,9 @@ export const UsersModel = DB.define("users", {
   },
   shortBio: {
     type: DataTypes.TEXT,
-    allowNull: false,
   },
   avatarUrl: {
     type: DataTypes.STRING,
-    allowNull: false,
   },
   role: {
     type: DataTypes.ENUM,

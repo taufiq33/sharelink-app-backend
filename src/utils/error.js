@@ -15,10 +15,11 @@ export class DataNotFound extends Error {
 }
 
 export class FormInputError extends Error {
-  constructor(message) {
+  constructor(message, fields) {
     super(message);
-    this.name = "Form Input error";
+    this.name = "Form Input Validation error";
     this.status = 400;
+    this.fields = fields;
   }
 }
 
