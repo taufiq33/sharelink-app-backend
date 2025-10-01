@@ -88,3 +88,30 @@ export async function login(request, response, next) {
     next(error);
   }
 }
+
+export async function logout(request, response, next) {
+  try {
+    const [revokeSession] = await RefreshTokenModel.update(
+      { isRevoked: true },
+      {
+        where: {
+          id: request.refreshtokenId,
+        },
+      }
+    );
+
+    if (revokeSession === 0) {
+      throw Error("internalDB error");
+    }
+
+    response.clearCookie("refresh_token");
+    response.json({
+      success: true,
+      data: {
+        message: "logout done",
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
