@@ -16,8 +16,6 @@ export async function refreshTokenCookieMiddleware(request, response, next) {
       throw new AuthError("invalid credentials");
     }
 
-    console.log(decodedUser);
-
     const refreshTokenInDB = await RefreshTokenModel.findOne({
       where: {
         token: refresh_token,
@@ -34,6 +32,7 @@ export async function refreshTokenCookieMiddleware(request, response, next) {
     }
 
     request.refreshtokenId = refreshTokenInDB.id;
+    request.userId = refreshTokenInDB.userId;
     next();
   } catch (error) {
     next(error);

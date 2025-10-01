@@ -1,7 +1,7 @@
 import { hash, compare } from "bcrypt";
 import { UsersModel } from "../models/UsersModel.js";
 import { RefreshTokenModel } from "../models/RefreshTokenModel.js";
-import { LoginError } from "../utils/error.js";
+import { AuthError, LoginError } from "../utils/error.js";
 import { generateToken } from "../utils/token.js";
 import { REFRESH_TOKEN_EXPIRED_MS } from "../config/app_config.js";
 
@@ -109,6 +109,38 @@ export async function logout(request, response, next) {
       success: true,
       data: {
         message: "logout done",
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function token(request, response, next) {
+  //todo handler blocked user
+  try {
+    const user = await UsersModel.findByPk(request.userId, {
+      attributes: ["id", "email", "username", "role", "active"],
+    });
+
+    console.log(user);
+
+    if (!user || !user.active) {
+      throw new AuthError("invalid credentials");
+    }
+
+    const newAccessToken = generateToken({
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      role: user.role,
+    });
+
+    response.json({
+      success: true,
+      data: {
+        message: "accessToken regenerated",
+        accessToken: newAccessToken,
       },
     });
   } catch (error) {
