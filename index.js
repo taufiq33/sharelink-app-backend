@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import morgan from "morgan";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-
+import useragent from "express-useragent";
 import DB from "./src/config/database.js";
 import { authRouter } from "./src/router/authRouter.js";
 import { ErrorHandlerMiddleware } from "./src/middleware/errorHandlerMiddleware.js";
@@ -12,6 +12,7 @@ dotenv.config();
 
 const app = e();
 
+app.use(useragent.express());
 app.use(morgan("dev"));
 app.use(cookieParser());
 app.use(e.json());
