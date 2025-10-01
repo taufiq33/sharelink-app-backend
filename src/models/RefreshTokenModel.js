@@ -30,7 +30,7 @@ export const RefreshTokenModel = DB.define("refreshToken", {
     defaultValue: false,
   },
   sessionLabel: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false,
   },
 });
