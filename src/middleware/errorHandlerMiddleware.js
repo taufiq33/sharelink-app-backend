@@ -1,5 +1,6 @@
 export function ErrorHandlerMiddleware(error, request, response, _next) {
-  console.error(error.fields);
+  console.table(error);
+  console.error(error);
 
   const responseJson = {
     name: error?.name || "internal Error",
@@ -20,7 +21,7 @@ export function ErrorHandlerMiddleware(error, request, response, _next) {
   }
 
   response.status(error?.status || 500).json({
-    error: true,
+    success: false,
     data: responseJson,
   });
 } // untuk error handler, express butuh 4 parameter , jika tdk lengkap, dianggap middleware biasa.
