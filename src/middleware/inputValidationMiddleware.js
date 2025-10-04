@@ -8,7 +8,7 @@ export function inputValidationMiddleware(schema) {
     } catch (error) {
       next(
         new FormInputError(
-          "Register user failed",
+          "validationInputError",
           error.issues.map((item) => ({
             path: item.path.join("."),
             message: item.message,
