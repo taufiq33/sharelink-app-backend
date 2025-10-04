@@ -7,10 +7,8 @@ export function ErrorHandlerMiddleware(error, request, response, _next) {
     message: error?.message || "internal error",
   };
 
-  if (error.name === "Form Input Validation error") {
-    if (error?.fields) {
-      responseJson.fields = error.fields;
-    }
+  if (error?.fields) {
+    responseJson.fields = error.fields;
   }
 
   if (error.name === "SequelizeUniqueConstraintError") {
