@@ -1,7 +1,7 @@
 import { hash, compare } from "bcrypt";
 import { UsersModel } from "../models/UsersModel.js";
 import { RefreshTokenModel } from "../models/RefreshTokenModel.js";
-import { AuthError, LoginError } from "../utils/error.js";
+import { AuthError, FormInputError, LoginError } from "../utils/error.js";
 import { generateToken } from "../utils/token.js";
 import { REFRESH_TOKEN_EXPIRED_MS } from "../config/app_config.js";
 
@@ -141,6 +141,42 @@ export async function token(request, response, next) {
       data: {
         message: "accessToken regenerated",
         accessToken: newAccessToken,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function nextStepRegistration(request, response, next) {
+  try {
+    const shortBio = request.body?.shortBio || "";
+    const photoProfile = request?.file?.filename || "";
+    if (!shortBio && !photoProfile) {
+      throw new FormInputError("shortBio / photoProfile not supplied");
+    }
+
+    const objectToUpdate = {};
+    if (shortBio) objectToUpdate.shortBio = shortBio;
+    if (photoProfile) objectToUpdate.avatarUrl = photoProfile;
+
+    const [updateUser] = await UsersModel.update(objectToUpdate, {
+      where: {
+        id: request.user.id,
+      },
+    });
+    if (updateUser === 0) {
+      throw Error("internal DB error");
+    }
+
+    response.json({
+      success: true,
+      data: {
+        message: "User ShortBio / PhotoProfile updated.",
+        user: {
+          ...request.user,
+          ...objectToUpdate,
+        },
       },
     });
   } catch (error) {
