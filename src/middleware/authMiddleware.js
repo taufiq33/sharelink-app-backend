@@ -1,5 +1,6 @@
-import { AuthError } from "../utils/error";
-import { verifyToken } from "../utils/token";
+import jwt from "jsonwebtoken";
+import { AuthError } from "../utils/error.js";
+import { verifyToken } from "../utils/token.js";
 
 export async function authMiddleware(request, response, next) {
   try {
@@ -18,6 +19,12 @@ export async function authMiddleware(request, response, next) {
     request.user = userPayload;
     next();
   } catch (error) {
+    if (
+      error instanceof jwt.JsonWebTokenError ||
+      error instanceof jwt.TokenExpiredError
+    ) {
+      return next(new AuthError("token invalid"));
+    }
     next(error);
   }
 }
