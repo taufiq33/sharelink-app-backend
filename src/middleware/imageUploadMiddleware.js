@@ -3,12 +3,12 @@ import { ImageUploadError } from "../utils/error.js";
 import {
   ALLOWED_IMAGE_TYPE,
   MAX_FILE_IMAGE_SIZE,
-  PHOTO_PROFILE_DIR,
+  PHOTO_PROFILE_USER_DIR,
 } from "../config/app_config.js";
 
 export function imageUploadMiddleware(fieldFileName) {
   const storage = multer.diskStorage({
-    destination: PHOTO_PROFILE_DIR,
+    destination: PHOTO_PROFILE_USER_DIR,
     filename: (request, file, callback) => {
       const extension = file.originalname.split(".").pop();
       callback(null, `${Date.now()}-${crypto.randomUUID()}.${extension}`);
@@ -33,7 +33,6 @@ export function imageUploadMiddleware(fieldFileName) {
 
   return (request, response, next) => {
     upload(request, response, (error) => {
-      console.log(PHOTO_PROFILE_DIR);
       if (error) {
         if (error.code === "LIMIT_FILE_SIZE") {
           return next(

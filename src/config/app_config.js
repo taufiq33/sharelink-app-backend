@@ -20,7 +20,7 @@ export const ALLOWED_IMAGE_TYPE = [
 
 export const MAX_FILE_IMAGE_SIZE = 3 * 1024 * 1024; //3MB
 
-export const PHOTO_PROFILE_DIR = path.join(
+export const PHOTO_PROFILE_USER_DIR = path.join(
   process.cwd(),
   "uploads/photoProfile/user"
 );
