@@ -6,11 +6,19 @@ export class AuthError extends Error {
   }
 }
 
-export class DataNotFound extends Error {
+export class DataNotFoundError extends Error {
   constructor(message) {
     super(message);
     this.name = "DataNotFound";
     this.status = 404;
+  }
+}
+
+export class BadRequestError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "BadRequestError";
+    this.status = 400;
   }
 }
 
@@ -36,5 +44,13 @@ export class ImageUploadError extends Error {
     super(message);
     this.name = "ImageUploadError";
     this.status = 400;
+  }
+}
+
+export class ForbiddenError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "ForbiddenError";
+    this.status = 403;
   }
 }

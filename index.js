@@ -6,6 +6,8 @@ import cookieParser from "cookie-parser";
 import useragent from "express-useragent";
 import DB from "./src/config/database.js";
 import { authRouter } from "./src/router/authRouter.js";
+import { meRouter } from "./src/router/meRouter.js";
+import { publicRouter } from "./src/router/publicRouter.js";
 import { ErrorHandlerMiddleware } from "./src/middleware/errorHandlerMiddleware.js";
 
 dotenv.config();
@@ -24,6 +26,8 @@ app.use(
 );
 
 app.use("/auth", authRouter);
+app.use("/me", meRouter);
+app.use("/public", publicRouter);
 
 app.use(ErrorHandlerMiddleware);
 

@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import path from "path";
 dotenv.config();
 
+export const APP_BASE_URL = "http://localhost:3300";
 export const ACCESS_TOKEN_SECRET_KEY = process.env.ACCESS_TOKEN_SECRET_KEY;
 export const REFRESH_TOKEN_SECRET_KEY = process.env.REFRESH_TOKEN_SECRET_KEY;
 export const DB_HOST = process.env.DB_HOST;
@@ -20,5 +21,11 @@ export const ALLOWED_IMAGE_TYPE = [
 export const MAX_FILE_IMAGE_SIZE = 3 * 1024 * 1024; //3MB
 
 export const PHOTO_PROFILE_DIR = path.join(
-  process.cwd() + "/uploads/photoProfile"
+  process.cwd(),
+  "uploads/photoProfile/user"
+);
+
+export const PHOTO_PROFILE_DEFAULT_DIR = path.join(
+  process.cwd(),
+  "uploads/photoProfile/default"
 );
