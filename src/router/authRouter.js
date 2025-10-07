@@ -4,7 +4,7 @@ import {
   login,
   logout,
   token,
-  nextStepRegistration,
+  updateProfile,
 } from "../controller/authController.js";
 import { inputValidationMiddleware } from "../middleware/inputValidationMiddleware.js";
 import { refreshTokenCookieMiddleware } from "../middleware/refreshTokenCookieMiddleware.js";
@@ -13,6 +13,7 @@ import { imageUploadMiddleware } from "../middleware/imageUploadMiddleware.js";
 import { imageFileValidation } from "../validation/imageFileValidation.js";
 import { registerSchema } from "../validation/registerSchema.js";
 import { loginSchema } from "../validation/loginSchema.js";
+import { updateProfileSchema } from "../validation/updateProfileSchema.js";
 
 const router = e.Router();
 
@@ -22,7 +23,8 @@ router.post(
   authMiddleware,
   imageUploadMiddleware("photoProfile"),
   imageFileValidation,
-  nextStepRegistration
+  inputValidationMiddleware(updateProfileSchema.partial()),
+  updateProfile
 );
 router.post("/login", inputValidationMiddleware(loginSchema), login);
 router.delete("/logout", refreshTokenCookieMiddleware, logout);

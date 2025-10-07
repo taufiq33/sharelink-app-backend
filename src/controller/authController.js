@@ -148,19 +148,28 @@ export async function token(request, response, next) {
   }
 }
 
-export async function nextStepRegistration(request, response, next) {
+export async function updateProfile(request, response, next) {
   try {
-    const shortBio = request.body?.shortBio || "";
-    const photoProfile = request?.file?.filename || "";
-    if (!shortBio && !photoProfile) {
-      throw new FormInputError("shortBio / photoProfile not supplied");
+    const allowed_fields = ["shortBio", "username", "email"];
+    const updates = {};
+
+    for (const field of allowed_fields) {
+      if (request.body?.[field]) {
+        updates[field] = request.body[field];
+      }
     }
 
-    const objectToUpdate = {};
-    if (shortBio) objectToUpdate.shortBio = shortBio;
-    if (photoProfile) objectToUpdate.avatarUrl = photoProfile;
+    if (request?.file) {
+      updates["avatarUrl"] = request.file.filename;
+    }
 
-    const [updateUser] = await UsersModel.update(objectToUpdate, {
+    console.log(updates);
+
+    if (Object.keys(updates).length === 0) {
+      throw new FormInputError("shortBio/username/email/avatar not supplied");
+    }
+
+    const [updateUser] = await UsersModel.update(updates, {
       where: {
         id: request.user.id,
       },
@@ -172,10 +181,9 @@ export async function nextStepRegistration(request, response, next) {
     response.json({
       success: true,
       data: {
-        message: "User ShortBio / PhotoProfile updated.",
-        user: {
-          ...request.user,
-          ...objectToUpdate,
+        message: "User updated.",
+        updated_fields: {
+          ...updates,
         },
       },
     });
