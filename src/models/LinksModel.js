@@ -2,47 +2,35 @@ import { DataTypes } from "sequelize";
 import DB from "../config/database.js";
 import { UsersModel } from "./UsersModel.js";
 
-export const LinksModel = DB.define(
-  "links",
-  {
-    id: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
-      primaryKey: true,
-    },
-    label: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-    },
-    link: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-    },
-    userId: {
-      type: DataTypes.UUID,
-      references: {
-        model: "users",
-        key: "id",
-      },
-    },
-    order: {
-      type: DataTypes.INTEGER,
-    },
-    clickCount: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
+export const LinksModel = DB.define("links", {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+  label: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
+  link: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
+  userId: {
+    type: DataTypes.UUID,
+    references: {
+      model: "users",
+      key: "id",
     },
   },
-  {
-    paranoid: true,
-    indexes: [
-      {
-        unique: true,
-        fields: ["userId", "order"],
-      },
-    ],
-  }
-);
+  order: {
+    type: DataTypes.INTEGER,
+  },
+  clickCount: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+  },
+});
 
 LinksModel.belongsTo(UsersModel, { foreignKey: "userId" });
 UsersModel.hasMany(LinksModel, {
