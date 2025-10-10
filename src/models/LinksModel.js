@@ -27,8 +27,6 @@ export const LinksModel = DB.define(
     },
     order: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-      unique: true,
     },
     clickCount: {
       type: DataTypes.INTEGER,
@@ -37,6 +35,12 @@ export const LinksModel = DB.define(
   },
   {
     paranoid: true,
+    indexes: [
+      {
+        unique: true,
+        fields: ["userId", "order"],
+      },
+    ],
   }
 );
 

@@ -39,4 +39,7 @@ export const UsersModel = DB.define("users", {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
   },
+  lastLinkOrder: {
+    type: DataTypes.INTEGER,
+  },
 });
