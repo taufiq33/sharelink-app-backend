@@ -1,12 +1,12 @@
 import multer from "multer";
-import { ImageUploadError } from "../utils/error.js";
+import { FormInputError, ImageUploadError } from "../utils/error.js";
 import {
   ALLOWED_IMAGE_TYPE,
   MAX_FILE_IMAGE_SIZE,
   PHOTO_PROFILE_USER_DIR,
 } from "../config/app_config.js";
 
-export function imageUploadMiddleware(fieldFileName) {
+export function imageUploadMiddleware(fieldFileName, notNull = false) {
   const storage = multer.diskStorage({
     destination: PHOTO_PROFILE_USER_DIR,
     filename: (request, file, callback) => {
@@ -33,6 +33,11 @@ export function imageUploadMiddleware(fieldFileName) {
 
   return (request, response, next) => {
     upload(request, response, (error) => {
+      if (notNull) {
+        if (!request.file) {
+          return next(new FormInputError("photoProfile can not be null"));
+        }
+      }
       if (error) {
         if (error.code === "LIMIT_FILE_SIZE") {
           return next(
