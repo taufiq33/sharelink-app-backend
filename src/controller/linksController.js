@@ -1,5 +1,7 @@
+import DB from "../config/database.js";
 import { LinksModel } from "../models/LinksModel.js";
 import { UsersModel } from "../models/UsersModel.js";
+import { ForbiddenError } from "../utils/error.js";
 
 export async function getLinksByUser(request, response, next) {
   try {
@@ -10,7 +12,7 @@ export async function getLinksByUser(request, response, next) {
     });
 
     response.json({
-      sucess: true,
+      success: true,
       data: {
         message: "getLinks done",
         links: LinksByUser,
@@ -52,6 +54,71 @@ export async function addLinksByUser(request, response, next) {
           link: newLink.link,
           order: newLink.order,
         },
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function reorderLink(request, response, next) {
+  try {
+    const results = await DB.transaction(async (t) => {
+      let linksUserByDB = await LinksModel.findAll({
+        where: { userId: request.user.id },
+        attributes: ["id"],
+        raw: true,
+        transaction: t,
+      });
+
+      linksUserByDB = linksUserByDB.map((item) => item.id);
+
+      const userLinksIds = new Set(linksUserByDB);
+
+      request.body.links.forEach((item) => {
+        if (!userLinksIds.has(item)) {
+          throw new ForbiddenError("forbidden request");
+        }
+      });
+
+      const updates = request.body.links.map((item, index) => {
+        return {
+          id: item,
+          order: index + 1,
+        };
+      });
+
+      const linksOrderUpdate = await Promise.all(
+        updates.map((item) => {
+          return LinksModel.update(
+            { order: item.order },
+            { where: { userId: request.user.id, id: item.id }, transaction: t }
+          );
+        })
+      );
+
+      const allSucceeded = linksOrderUpdate.every(
+        ([affectedRows]) => affectedRows === 1
+      );
+
+      if (!allSucceeded) {
+        throw Error("internal DB error");
+      }
+
+      const linksAfterReOrder = await LinksModel.findAll({
+        where: { userId: request.user.id },
+        order: [["order", "ASC"]],
+        transaction: t,
+      });
+
+      return linksAfterReOrder;
+    });
+
+    return response.json({
+      success: true,
+      data: {
+        message: "reorder links done.",
+        links: results,
       },
     });
   } catch (error) {
