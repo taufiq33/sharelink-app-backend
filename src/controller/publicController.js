@@ -6,6 +6,7 @@ import {
   PHOTO_PROFILE_DEFAULT_DIR,
   PHOTO_PROFILE_USER_DIR,
 } from "../config/app_config.js";
+import { LinksModel } from "../models/LinksModel.js";
 
 export async function photoProfile(request, response, next) {
   try {
@@ -34,6 +35,40 @@ export async function photoProfile(request, response, next) {
     }
 
     return response.sendFile(filePath);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getLinksByUsername(request, response, next) {
+  try {
+    if (!request.params?.username) {
+      return next(new BadRequestError("username not suplied."));
+    }
+
+    const linksByUsername = await UsersModel.findOne({
+      where: { username: request.params.username },
+      attributes: ["username"],
+      include: [
+        {
+          model: LinksModel,
+          attributes: ["label", "link"],
+        },
+      ],
+    });
+
+    if (!linksByUsername) {
+      return next(new DataNotFoundError("links not found"));
+    }
+
+    response.json({
+      success: true,
+      data: {
+        message: "get links by username done",
+        username: linksByUsername.username,
+        links: linksByUsername.links,
+      },
+    });
   } catch (error) {
     next(error);
   }
