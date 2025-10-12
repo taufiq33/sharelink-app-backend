@@ -1,7 +1,11 @@
 import DB from "../config/database.js";
 import { LinksModel } from "../models/LinksModel.js";
 import { UsersModel } from "../models/UsersModel.js";
-import { ForbiddenError } from "../utils/error.js";
+import {
+  BadRequestError,
+  DataNotFoundError,
+  ForbiddenError,
+} from "../utils/error.js";
 
 export async function getLinksByUser(request, response, next) {
   try {
@@ -127,6 +131,67 @@ export async function reorderLink(request, response, next) {
       data: {
         message: "reorder links done.",
         links: results,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function singleDetailLink(request, response, next) {
+  if (!request.params?.id) {
+    throw new BadRequestError("link id not supllied");
+  }
+  try {
+    const link = await LinksModel.findByPk(request.params.id);
+
+    if (!link) {
+      throw new DataNotFoundError("link not found");
+    }
+
+    response.json({
+      success: true,
+      data: {
+        message: "get link detail done.",
+        link,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function singleEditLink(request, response, next) {
+  if (!request.params?.id) {
+    throw new BadRequestError("link id not supllied");
+  }
+  try {
+    const [updateLink] = await LinksModel.update(
+      {
+        label: request.body.label,
+        link: request.body.link,
+      },
+      {
+        where: {
+          userId: request.user.id,
+          id: request.params.id,
+        },
+      }
+    );
+
+    if (updateLink === 0) {
+      throw Error("internal DB error");
+    }
+
+    response.json({
+      success: true,
+      data: {
+        message: "edit link success",
+        updateLink: {
+          id: request.params.id,
+          label: request.body.label,
+          link: request.body.link,
+        },
       },
     });
   } catch (error) {
