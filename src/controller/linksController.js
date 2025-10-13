@@ -198,3 +198,31 @@ export async function singleEditLink(request, response, next) {
     next(error);
   }
 }
+
+export async function deleteLinkByUserId(request, response, next) {
+  if (!request.params?.id) {
+    throw new BadRequestError("link id not supllied");
+  }
+  try {
+    const affectedRows = await LinksModel.destroy({
+      where: {
+        id: request.params.id,
+        userId: request.user.id,
+      },
+    });
+
+    if (!affectedRows) {
+      throw new DataNotFoundError("link not found");
+    }
+
+    response.json({
+      success: true,
+      data: {
+        message: "delete link done",
+        link: request.params.id,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}

@@ -2,6 +2,7 @@ import e from "express";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import {
   addLinksByUser,
+  deleteLinkByUserId,
   getLinksByUser,
   reorderLink,
   singleDetailLink,
@@ -33,5 +34,7 @@ router.put(
   inputValidationMiddleware(linkSchema),
   singleEditLink
 );
+
+router.delete("/:id", authMiddleware, deleteLinkByUserId);
 
 export const linksRouter = router;
