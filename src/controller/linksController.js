@@ -139,21 +139,12 @@ export async function reorderLink(request, response, next) {
 }
 
 export async function singleDetailLink(request, response, next) {
-  if (!request.params?.id) {
-    throw new BadRequestError("link id not supllied");
-  }
   try {
-    const link = await LinksModel.findByPk(request.params.id);
-
-    if (!link) {
-      throw new DataNotFoundError("link not found");
-    }
-
     response.json({
       success: true,
       data: {
         message: "get link detail done.",
-        link,
+        link: request.resource,
       },
     });
   } catch (error) {
@@ -200,17 +191,8 @@ export async function singleEditLink(request, response, next) {
 }
 
 export async function deleteLinkByUserId(request, response, next) {
-  if (!request.params?.id) {
-    throw new BadRequestError("link id not supllied");
-  }
   try {
-    const affectedRows = await LinksModel.destroy({
-      where: {
-        id: request.params.id,
-        userId: request.user.id,
-      },
-    });
-
+    const affectedRows = await request.resource.destroy();
     if (!affectedRows) {
       throw new DataNotFoundError("link not found");
     }
