@@ -7,6 +7,7 @@ import {
   PHOTO_PROFILE_USER_DIR,
 } from "../config/app_config.js";
 import { LinksModel } from "../models/LinksModel.js";
+import { isLimit, isSpam } from "../utils/tracking.js";
 
 export async function photoProfile(request, response, next) {
   try {
@@ -46,6 +47,10 @@ export async function getLinksByUsername(request, response, next) {
       return next(new BadRequestError("username not suplied."));
     }
 
+    if (request.params?.username === "admin") {
+      return next(new DataNotFoundError("invalid username"));
+    }
+
     const linksByUsername = await UsersModel.findOne({
       where: { username: request.params.username },
       attributes: ["username"],
@@ -72,4 +77,28 @@ export async function getLinksByUsername(request, response, next) {
   } catch (error) {
     next(error);
   }
+}
+
+export async function track(request, response) {
+  response.sendStatus(204);
+
+  setImmediate(async () => {
+    if (!isLimit(request.body.deviceId)) {
+      if (!isSpam(request.body.deviceId, request.body.linkId)) {
+        console.log("lolos spam dan limit");
+        const link = await LinksModel.findByPk(request.body.linkId);
+        if (!link) {
+          console.error("link not found");
+        }
+        await link.increment("clickCount");
+      } else {
+        console.log("spam!!");
+      }
+    } else {
+      console.log("limit!!");
+    }
+    // console.log(
+    //   `${new Date()} => ${request.body.deviceId} - ${isLimitRequest}`
+    // );
+  });
 }
