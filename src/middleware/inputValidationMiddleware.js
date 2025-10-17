@@ -1,7 +1,12 @@
-import { FormInputError } from "../utils/error.js";
+import { BadRequestError, FormInputError } from "../utils/error.js";
 
 export function inputValidationMiddleware(schema) {
   return (request, response, next) => {
+    if (!request.body) {
+      throw new BadRequestError(
+        `${Object.keys(schema.shape).toString()} can not be null`
+      );
+    }
     try {
       schema.parse(request.body);
       next();
