@@ -9,6 +9,7 @@ import { authRouter } from "./src/router/authRouter.js";
 import { meRouter } from "./src/router/meRouter.js";
 import { publicRouter } from "./src/router/publicRouter.js";
 import { linksRouter } from "./src/router/linksRouter.js";
+import { adminRouter } from "./src/router/adminRouter.js";
 import { ErrorHandlerMiddleware } from "./src/middleware/errorHandlerMiddleware.js";
 import { clearClickCacheAboveFiveMinutes } from "./src/utils/tracking.js";
 import { INTERVAL_CLEAR_CLICK_CACHE_MS } from "./src/config/app_config.js";
@@ -32,6 +33,7 @@ app.use("/auth", authRouter);
 app.use("/me", meRouter);
 app.use("/public", publicRouter);
 app.use("/links", linksRouter);
+app.use("/admin", adminRouter);
 
 app.use(ErrorHandlerMiddleware);
 
