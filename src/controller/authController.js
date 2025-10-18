@@ -29,12 +29,10 @@ export async function register(request, response, next) {
 }
 
 export async function login(request, response, next) {
-  // todo handler user not active
   try {
     const userByEmail = await UsersModel.findOne({
       where: {
         email: request.body.email,
-        active: true,
       },
     });
 
@@ -42,9 +40,13 @@ export async function login(request, response, next) {
       throw new LoginError("invalid email/password");
     }
 
+    if (!userByEmail.active) {
+      throw new LoginError("account suspended.");
+    }
+
     const passwordIsValid = await compare(
       request.body.password,
-      userByEmail.password
+      userByEmail.password,
     );
 
     console.log("passwordValid", passwordIsValid);
@@ -97,7 +99,7 @@ export async function logout(request, response, next) {
         where: {
           id: request.refreshtokenId,
         },
-      }
+      },
     );
 
     if (revokeSession === 0) {
