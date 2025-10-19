@@ -2,6 +2,7 @@ import DB from "./src/config/database.js";
 import { UsersModel } from "./src/models/UsersModel.js";
 import { RefreshTokenModel } from "./src/models/RefreshTokenModel.js";
 import { LinksModel } from "./src/models/LinksModel.js";
+import { NotificationsModel } from "./src/models/NotificationsModel.js";
 
 const args = process.argv[2] || "";
 const isForce = args.includes("force");
