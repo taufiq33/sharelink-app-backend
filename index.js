@@ -13,6 +13,7 @@ import { adminRouter } from "./src/router/adminRouter.js";
 import { ErrorHandlerMiddleware } from "./src/middleware/errorHandlerMiddleware.js";
 import { clearClickCacheAboveFiveMinutes } from "./src/utils/tracking.js";
 import { INTERVAL_CLEAR_CLICK_CACHE_MS } from "./src/config/app_config.js";
+import { notificationRouter } from "./src/router/notificationRouter.js";
 
 dotenv.config();
 
@@ -26,7 +27,7 @@ app.use(
   cors({
     credentials: true,
     origin: "http://localhost:4200",
-  })
+  }),
 );
 
 app.use("/auth", authRouter);
@@ -34,6 +35,7 @@ app.use("/me", meRouter);
 app.use("/public", publicRouter);
 app.use("/links", linksRouter);
 app.use("/admin", adminRouter);
+app.use("/notification", notificationRouter);
 
 app.use(ErrorHandlerMiddleware);
 
