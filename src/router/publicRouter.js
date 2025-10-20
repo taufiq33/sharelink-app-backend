@@ -1,12 +1,14 @@
 import e from "express";
 import {
   getLinksByUsername,
+  makeReport,
   photoProfile,
   track,
 } from "../controller/publicController.js";
 import { inputValidationMiddleware } from "../middleware/inputValidationMiddleware.js";
 
 import { trackSchema } from "../validation/trackSchema.js";
+import { reportingSchema } from "../validation/reportingSchema.js";
 
 const router = e.Router();
 
@@ -28,7 +30,9 @@ router.post(
       next();
     }
   },
-  track
+  track,
 );
+
+router.post("/report", inputValidationMiddleware(reportingSchema), makeReport);
 
 export const publicRouter = router;
