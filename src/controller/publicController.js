@@ -7,6 +7,7 @@ import {
   PHOTO_PROFILE_USER_DIR,
 } from "../config/app_config.js";
 import { LinksModel } from "../models/LinksModel.js";
+import { ReportingModel } from "../models/ReportingModel.js";
 import { isLimit, isSpam } from "../utils/tracking.js";
 
 export async function photoProfile(request, response, next) {
@@ -57,7 +58,7 @@ export async function getLinksByUsername(request, response, next) {
       include: [
         {
           model: LinksModel,
-          attributes: ["label", "link"],
+          attributes: ["label", "link", "id"],
         },
       ],
     });
@@ -101,4 +102,27 @@ export async function track(request, response) {
     //   `${new Date()} => ${request.body.deviceId} - ${isLimitRequest}`
     // );
   });
+}
+
+export async function makeReport(request, response, next) {
+  try {
+    const newReport = {
+      type: request.body.type,
+      reason: request.body.reason,
+      userReporter: request.body.userReporter,
+      userTarget: request.body.userTarget,
+      linkTarget: request.body?.linkTarget || null,
+    };
+    await ReportingModel.create(newReport);
+
+    response.json({
+      success: true,
+      data: {
+        message: "submit report done.",
+        data: newReport,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
 }

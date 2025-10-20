@@ -1,6 +1,7 @@
 import { UsersModel } from "../models/UsersModel.js";
 import { LinksModel } from "../models/LinksModel.js";
 import { Sequelize } from "sequelize";
+import { ReportingModel } from "../models/ReportingModel.js";
 
 export async function getUsers(request, response, next) {
   try {
@@ -97,4 +98,60 @@ export function flagUser(type) {
       next(error);
     }
   };
+}
+
+export async function markReport(request, response, next) {
+  try {
+    const [markReport] = await ReportingModel.update(
+      { markReview: request.body.mark },
+      { where: { id: request.params.id } },
+    );
+
+    if (markReport === 0) {
+      throw Error("internal db error");
+    }
+
+    response.json({
+      success: true,
+      data: {
+        message: `mark report as "${request.body.mark}" done.`,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getReports(request, response, next) {
+  try {
+    const reports = await ReportingModel.findAll({
+      include: [
+        {
+          model: UsersModel,
+          as: "reporter",
+          attributes: ["id", "username"],
+        },
+        {
+          model: UsersModel,
+          as: "target",
+          attributes: ["id", "username"],
+        },
+        {
+          model: LinksModel,
+          as: "link",
+          attributes: ["id", "label", "link"],
+        },
+      ],
+    });
+
+    response.json({
+      success: true,
+      data: {
+        message: `fetch reports done`,
+        reports,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
 }
