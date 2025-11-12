@@ -54,7 +54,7 @@ export async function getLinksByUsername(request, response, next) {
 
     const linksByUsername = await UsersModel.findOne({
       where: { username: request.params.username },
-      attributes: ["username"],
+      attributes: ["username", "shortBio"],
       include: [
         {
           model: LinksModel,
@@ -72,6 +72,7 @@ export async function getLinksByUsername(request, response, next) {
       data: {
         message: "get links by username done",
         username: linksByUsername.username,
+        shortBio: linksByUsername.shortBio,
         links: linksByUsername.links,
       },
     });
