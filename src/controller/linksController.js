@@ -9,9 +9,17 @@ import {
 
 export async function getLinksByUser(request, response, next) {
   try {
-    const LinksByUser = await LinksModel.findAll({
+    const page = request.query.page || 1;
+    const limit = request.query.limit || 10;
+    const sort = request.query.sort || "ASC";
+    const sortBy = request.query.sortBy || "createdAt";
+    const offset = (page - 1) * limit;
+
+    const LinksByUser = await LinksModel.findAndCountAll({
       where: { userId: request.user.id },
-      order: [["order", "ASC"]],
+      order: [[sortBy, sort]],
+      limit: limit,
+      offset: offset,
       attributes: { exclude: ["deletedAt"] },
     });
 
@@ -19,7 +27,11 @@ export async function getLinksByUser(request, response, next) {
       success: true,
       data: {
         message: "getLinks done",
-        links: LinksByUser,
+        links: LinksByUser.rows,
+        limit: limit,
+        page: page,
+        totalPage: Math.ceil(LinksByUser.count / limit),
+        totalLinks: LinksByUser.count,
       },
     });
   } catch (error) {
@@ -42,12 +54,12 @@ export async function addLinksByUser(request, response, next) {
           order: (data.lastLinkOrder || 0) + 1,
           userId: request.user.id,
         },
-        { transaction: t }
+        { transaction: t },
       );
 
       const [updateDB] = await UsersModel.update(
         { lastLinkOrder: data.lastLinkOrder + 1 },
-        { where: { id: request.user.id }, transaction: t }
+        { where: { id: request.user.id }, transaction: t },
       );
 
       if (updateDB === 0) {
@@ -104,13 +116,13 @@ export async function reorderLink(request, response, next) {
         updates.map((item) => {
           return LinksModel.update(
             { order: item.order },
-            { where: { userId: request.user.id, id: item.id }, transaction: t }
+            { where: { userId: request.user.id, id: item.id }, transaction: t },
           );
-        })
+        }),
       );
 
       const allSucceeded = linksOrderUpdate.every(
-        ([affectedRows]) => affectedRows === 1
+        ([affectedRows]) => affectedRows === 1,
       );
 
       if (!allSucceeded) {
@@ -167,7 +179,7 @@ export async function singleEditLink(request, response, next) {
           userId: request.user.id,
           id: request.params.id,
         },
-      }
+      },
     );
 
     if (updateLink === 0) {

@@ -59,6 +59,7 @@ export async function getLinksByUsername(request, response, next) {
         {
           model: LinksModel,
           attributes: ["label", "link", "id"],
+          order: [["order", "ASC"]],
         },
       ],
     });
