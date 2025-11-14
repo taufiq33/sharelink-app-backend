@@ -1,6 +1,7 @@
 import { UsersModel } from "../models/UsersModel.js";
 import { DataNotFoundError } from "../utils/error.js";
 import { APP_BASE_URL } from "../config/app_config.js";
+import { LinksModel } from "../models/LinksModel.js";
 
 export async function loadSelfProfile(request, response, next) {
   try {
@@ -22,6 +23,28 @@ export async function loadSelfProfile(request, response, next) {
           active: user.active,
         },
       },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function loadStatistics(request, response, next) {
+  try {
+    const links = await LinksModel.findAll({
+      where: { userId: request.user.id },
+      raw: true,
+    });
+    const totalLink = links.length;
+    const totalClick = links.reduce((total, item) => {
+      total += item.clickCount;
+      return total;
+    }, 0);
+
+    response.json({
+      success: true,
+      message: "fetch user statistic done.",
+      data: { username: request.user.username, totalLink, totalClick },
     });
   } catch (error) {
     next(error);

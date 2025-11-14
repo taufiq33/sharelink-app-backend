@@ -1,5 +1,5 @@
 import e from "express";
-import { loadSelfProfile } from "../controller/meController.js";
+import { loadSelfProfile, loadStatistics } from "../controller/meController.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { updateProfile } from "../controller/authController.js";
 import { imageUploadMiddleware } from "../middleware/imageUploadMiddleware.js";
@@ -9,13 +9,14 @@ import { updateProfileSchema } from "../validation/updateProfileSchema.js";
 const router = e.Router();
 
 router.get("/", authMiddleware, loadSelfProfile);
+router.get("/statistics", authMiddleware, loadStatistics);
 router.put(
   "/",
   authMiddleware,
   imageUploadMiddleware("photoProfile", true),
   imageFileValidation,
   inputValidationMiddleware(updateProfileSchema),
-  updateProfile
+  updateProfile,
 );
 
 export const meRouter = router;
