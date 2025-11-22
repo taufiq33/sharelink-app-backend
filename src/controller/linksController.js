@@ -25,8 +25,8 @@ export async function getLinksByUser(request, response, next) {
 
     response.json({
       success: true,
+      message: "getLinks done",
       data: {
-        message: "getLinks done",
         links: LinksByUser.rows,
         limit: limit,
         page: page,
