@@ -1,5 +1,9 @@
 import e from "express";
-import { loadSelfProfile, loadStatistics } from "../controller/meController.js";
+import {
+  loadSelfProfile,
+  loadStatistics,
+  deletePhotoProfile,
+} from "../controller/meController.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { updateProfile } from "../controller/authController.js";
 import { imageUploadMiddleware } from "../middleware/imageUploadMiddleware.js";
@@ -18,5 +22,6 @@ router.put(
   inputValidationMiddleware(updateProfileSchema),
   updateProfile,
 );
+router.delete("/photoProfile", authMiddleware, deletePhotoProfile);
 
 export const meRouter = router;

@@ -1,7 +1,9 @@
 import { UsersModel } from "../models/UsersModel.js";
 import { DataNotFoundError } from "../utils/error.js";
-import { APP_BASE_URL } from "../config/app_config.js";
+import { APP_BASE_URL, PHOTO_PROFILE_USER_DIR } from "../config/app_config.js";
 import { LinksModel } from "../models/LinksModel.js";
+import fs from "fs/promises";
+import path from "path";
 
 export async function loadSelfProfile(request, response, next) {
   try {
@@ -47,6 +49,49 @@ export async function loadStatistics(request, response, next) {
       data: { username: request.user.username, totalLink, totalClick },
     });
   } catch (error) {
+    next(error);
+  }
+}
+
+export async function deletePhotoProfile(request, response, next) {
+  const transaction = await UsersModel.sequelize.transaction();
+  try {
+    const user = await UsersModel.findByPk(request.user.id, {
+      attributes: ["avatarUrl", "id"],
+      transaction,
+    });
+
+    if (!user) {
+      await transaction.rollback();
+      throw new DataNotFoundError("User not found");
+    }
+
+    const oldAvatarUrl = user.avatarUrl;
+
+    await user.update({ avatarUrl: null }, { transaction });
+
+    await transaction.commit();
+
+    if (oldAvatarUrl) {
+      fs.unlink(path.join(PHOTO_PROFILE_USER_DIR, oldAvatarUrl)).catch(
+        (error) => {
+          console.error("Failed to delete avatar file:", {
+            userId: request.user.id,
+            fileName: oldAvatarUrl,
+            error: error.message,
+          });
+        },
+      );
+    }
+
+    return response.json({
+      success: true,
+      message: "remove photo profile success",
+    });
+  } catch (error) {
+    if (transaction && !transaction.finished) {
+      await transaction.rollback();
+    }
     next(error);
   }
 }
