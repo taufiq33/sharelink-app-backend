@@ -1,9 +1,10 @@
 import { UsersModel } from "../models/UsersModel.js";
-import { DataNotFoundError } from "../utils/error.js";
+import { DataNotFoundError, FormInputError } from "../utils/error.js";
 import { APP_BASE_URL, PHOTO_PROFILE_USER_DIR } from "../config/app_config.js";
 import { LinksModel } from "../models/LinksModel.js";
 import fs from "fs/promises";
 import path from "path";
+import { hash, compare } from "bcrypt";
 
 export async function loadSelfProfile(request, response, next) {
   try {
@@ -92,6 +93,33 @@ export async function deletePhotoProfile(request, response, next) {
     if (transaction && !transaction.finished) {
       await transaction.rollback();
     }
+    next(error);
+  }
+}
+
+export async function changePassword(request, response, next) {
+  try {
+    const user = await UsersModel.findByPk(request.user.id);
+
+    const passwordIsValid = await compare(
+      request.body.oldPassword,
+      user.password,
+    );
+
+    console.log("passwordValid", passwordIsValid);
+
+    if (!passwordIsValid) {
+      throw new FormInputError("invalid old password");
+    }
+
+    const newPassword = await hash(request.body.newPassword, 12);
+    await user.update({ password: newPassword });
+
+    return response.json({
+      success: true,
+      message: "update password success.",
+    });
+  } catch (error) {
     next(error);
   }
 }

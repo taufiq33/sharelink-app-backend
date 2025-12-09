@@ -156,9 +156,7 @@ export async function updateProfile(request, response, next) {
     const updates = {};
 
     for (const field of allowed_fields) {
-      if (request.body?.[field]) {
-        updates[field] = request.body[field];
-      }
+      updates[field] = request.body[field];
     }
 
     if (request?.file) {
