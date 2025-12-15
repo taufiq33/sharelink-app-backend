@@ -58,10 +58,10 @@ export async function getLinksByUsername(request, response, next) {
       include: [
         {
           model: LinksModel,
-          attributes: ["label", "link", "id"],
-          order: [["order", "ASC"]],
+          attributes: ["label", "link", "id", "order"],
         },
       ],
+      order: [[{ model: LinksModel, as: "links" }, "order", "ASC"]],
     });
 
     if (!linksByUsername) {
