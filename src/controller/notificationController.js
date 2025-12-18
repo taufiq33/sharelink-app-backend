@@ -55,6 +55,34 @@ export async function markNotificationAsRead(request, response, next) {
   }
 }
 
+export async function markAllNotificationAsRead(request, response, next) {
+  try {
+    const [updateAsRead] = await NotificationsModel.update(
+      {
+        isRead: true,
+      },
+      {
+        where: {
+          userId: request.user.id,
+        },
+      },
+    );
+
+    if (updateAsRead === 0) {
+      throw Error("internal DB error");
+    }
+
+    response.json({
+      success: true,
+      data: {
+        message: "mark all notification as read done",
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function fetchNotifications(request, response, next) {
   try {
     const notifications = await NotificationsModel.findAll({});
@@ -77,6 +105,7 @@ export async function fetchNotificationByUser(request, response, next) {
       where: {
         userId: request.user.id,
       },
+      order: [["createdAt", "DESC"]],
     });
 
     response.json({
