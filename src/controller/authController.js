@@ -46,7 +46,7 @@ export async function login(request, response, next) {
 
     const passwordIsValid = await compare(
       request.body.password,
-      userByEmail.password,
+      userByEmail.password
     );
 
     console.log("passwordValid", passwordIsValid);
@@ -64,7 +64,7 @@ export async function login(request, response, next) {
 
     const refresh_token = generateToken(userWithoutPassword, true);
 
-    const useragent = JSON.stringify(request.useragent);
+    const useragent = request.useragent;
 
     await RefreshTokenModel.create({
       token: refresh_token,
@@ -99,7 +99,7 @@ export async function logout(request, response, next) {
         where: {
           id: request.refreshtokenId,
         },
-      },
+      }
     );
 
     if (revokeSession === 0) {

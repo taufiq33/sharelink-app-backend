@@ -22,6 +22,7 @@ export const MAX_REQUEST_PER_MINUTE = 10;
 export const INTERVAL_VALID_TRACK_MS = 5 * 1000; // 5sec
 export const KEEP_CLICK_CACHE_DATA_MS = 60 * 5 * 1000; //5min
 export const INTERVAL_CLEAR_CLICK_CACHE_MS = 60 * 5 * 1000; //5min
+export const INTERVAL_CLEAR_UNUSED_SESSIONS_MS = 60 * 60 * 1000; //1hour
 
 export const MAX_FILE_IMAGE_SIZE = 3 * 1024 * 1024; //3MB
 
