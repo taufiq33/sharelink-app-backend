@@ -9,8 +9,8 @@ function normalizeSessionLabel(label) {
     deviceType: label.isMobile
       ? "mobile"
       : label.isTablet
-      ? "tablet"
-      : "desktop",
+        ? "tablet"
+        : "desktop",
   };
 }
 
@@ -20,6 +20,7 @@ export async function getSessions(request, response, next) {
       where: { userId: request.user.id, isRevoked: false },
       attributes: ["id", "sessionLabel", "createdAt"],
       raw: true,
+      order: [["expiredAt", "DESC"]],
     });
 
     sessions = sessions.map((item) => {
@@ -66,7 +67,7 @@ export async function revokeSession(request, response, next) {
       },
       {
         where: { id: request.params.id, userId: request.user.id },
-      }
+      },
     );
     if (affected > 0) {
       response.json({
