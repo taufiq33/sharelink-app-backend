@@ -14,6 +14,8 @@ import {
   getReports,
   getUsers,
   markReport,
+  loadStats,
+  loadLast5DayStats,
 } from "../controller/adminController.js";
 
 const router = e.Router();
@@ -35,5 +37,8 @@ router.patch(
   markReport,
 );
 router.get("/reports", getReports);
+
+router.post("/getStats", loadStats);
+router.post("/getRecentStats", loadLast5DayStats);
 
 export const adminRouter = router;

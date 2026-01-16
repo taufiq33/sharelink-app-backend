@@ -1,7 +1,8 @@
 import { UsersModel } from "../models/UsersModel.js";
 import { LinksModel } from "../models/LinksModel.js";
-import { Sequelize } from "sequelize";
+import { Sequelize, Op, fn, col } from "sequelize";
 import { ReportingModel } from "../models/ReportingModel.js";
+import { format } from "date-fns";
 
 export async function getUsers(request, response, next) {
   try {
@@ -149,6 +150,114 @@ export async function getReports(request, response, next) {
       data: {
         message: `fetch reports done`,
         reports,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function loadStats(request, response, next) {
+  try {
+    const [users, links, reports] = await Promise.all([
+      UsersModel.count({ where: { active: true } }),
+      LinksModel.count(),
+      ReportingModel.count(),
+    ]);
+
+    response.json({
+      success: true,
+      data: {
+        message: `load Stats done`,
+        stats: { users, links, reports },
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function loadLast5DayStats(request, response, next) {
+  try {
+    const endDate = new Date();
+    endDate.setHours(23, 59, 59, 999);
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - 4);
+    startDate.setHours(0, 0, 0, 0);
+
+    const days = [];
+    for (let i = 4; i >= 0; i--) {
+      let date = new Date(endDate);
+      date.setDate(endDate.getDate() - i);
+      days.push(format(date, "yyyy-MM-dd"));
+    }
+
+    const [usersPerDay, linksPerDay, reportsPerDay] = await Promise.all([
+      UsersModel.findAll({
+        attributes: [
+          [fn("DATE", col("createdAt")), "date"],
+          [fn("COUNT", col("id")), "users"],
+        ],
+        where: {
+          active: true,
+          createdAt: {
+            [Op.between]: [startDate, endDate],
+          },
+        },
+        group: [fn("DATE", col("createdAt"))],
+        raw: true,
+      }),
+
+      LinksModel.findAll({
+        attributes: [
+          [fn("DATE", col("createdAt")), "date"],
+          [fn("COUNT", col("id")), "links"],
+        ],
+        where: {
+          createdAt: {
+            [Op.between]: [startDate, endDate],
+          },
+        },
+        group: [fn("DATE", col("createdAt"))],
+        raw: true,
+      }),
+
+      ReportingModel.findAll({
+        attributes: [
+          [fn("DATE", col("createdAt")), "date"],
+          [fn("COUNT", col("id")), "reports"],
+        ],
+        where: {
+          createdAt: {
+            [Op.between]: [startDate, endDate],
+          },
+        },
+        group: [fn("DATE", col("createdAt"))],
+        raw: true,
+      }),
+    ]);
+
+    const map = Object.fromEntries(
+      days.map((date) => [date, { date, users: 0, links: 0, reports: 0 }]),
+    );
+
+    for (const u of usersPerDay) {
+      map[u.date].users = Number(u.users);
+    }
+
+    for (const l of linksPerDay) {
+      map[l.date].links = Number(l.links);
+    }
+
+    for (const r of reportsPerDay) {
+      map[r.date].reports = Number(r.reports);
+    }
+
+    response.json({
+      success: true,
+      data: {
+        message: `load last 5 day Stats done`,
+        stats: Object.values(map),
       },
     });
   } catch (error) {
