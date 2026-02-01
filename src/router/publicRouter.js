@@ -4,6 +4,7 @@ import {
   makeReport,
   photoProfile,
   track,
+  singleDetailLink,
 } from "../controller/publicController.js";
 import { inputValidationMiddleware } from "../middleware/inputValidationMiddleware.js";
 
@@ -17,6 +18,8 @@ router.get("/photoProfile/:username", photoProfile);
 
 router.get("/links/", getLinksByUsername);
 router.get("/links/:username", getLinksByUsername);
+
+router.get("/link/:id", singleDetailLink);
 
 router.post(
   "/tracklink",

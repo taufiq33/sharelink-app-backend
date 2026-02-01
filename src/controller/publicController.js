@@ -107,6 +107,24 @@ export async function track(request, response) {
   });
 }
 
+export async function singleDetailLink(request, response, next) {
+  try {
+    const link = await LinksModel.findByPk(request.params?.id);
+
+    if (!link) return next(new DataNotFoundError("link not found"));
+
+    response.json({
+      success: true,
+      data: {
+        message: "get link detail done.",
+        link: { id: link.id, label: link.label, url: link.link },
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function makeReport(request, response, next) {
   try {
     const newReport = {
