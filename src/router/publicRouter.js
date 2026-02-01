@@ -10,6 +10,7 @@ import { inputValidationMiddleware } from "../middleware/inputValidationMiddlewa
 
 import { trackSchema } from "../validation/trackSchema.js";
 import { reportingSchema } from "../validation/reportingSchema.js";
+import { refreshTokenCookieMiddleware } from "../middleware/refreshTokenCookieMiddleware.js";
 
 const router = e.Router();
 
@@ -36,6 +37,11 @@ router.post(
   track,
 );
 
-router.post("/report", inputValidationMiddleware(reportingSchema), makeReport);
+router.post(
+  "/report",
+  refreshTokenCookieMiddleware,
+  inputValidationMiddleware(reportingSchema),
+  makeReport,
+);
 
 export const publicRouter = router;

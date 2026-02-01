@@ -130,7 +130,7 @@ export async function makeReport(request, response, next) {
     const newReport = {
       type: request.body.type,
       reason: request.body.reason,
-      userReporter: request.body.userReporter,
+      userReporter: request.userId || null,
       userTarget: request.body.userTarget,
       linkTarget: request.body?.linkTarget || null,
     };
