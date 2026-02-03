@@ -11,6 +11,7 @@ import { inputValidationMiddleware } from "../middleware/inputValidationMiddlewa
 import { trackSchema } from "../validation/trackSchema.js";
 import { reportingSchema } from "../validation/reportingSchema.js";
 import { refreshTokenCookieMiddleware } from "../middleware/refreshTokenCookieMiddleware.js";
+import { optionalRefreshTokenCookieMiddleware } from "../middleware/optionalRefreshTokenCookieMiddleware.js";
 
 const router = e.Router();
 
@@ -39,7 +40,7 @@ router.post(
 
 router.post(
   "/report",
-  refreshTokenCookieMiddleware,
+  optionalRefreshTokenCookieMiddleware,
   inputValidationMiddleware(reportingSchema),
   makeReport,
 );
