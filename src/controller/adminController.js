@@ -126,6 +126,7 @@ export async function markReport(request, response, next) {
 export async function getReports(request, response, next) {
   try {
     const reports = await ReportingModel.findAll({
+      order: [["createdAt", "DESC"]],
       include: [
         {
           model: UsersModel,
@@ -150,6 +151,56 @@ export async function getReports(request, response, next) {
       data: {
         message: `fetch reports done`,
         reports,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function loadReportDetail(request, response, next) {
+  try {
+    const reports = await ReportingModel.findOne({
+      where: { id: request.params.id },
+      include: [
+        {
+          model: UsersModel,
+          as: "reporter",
+          attributes: ["id", "username"],
+        },
+        {
+          model: UsersModel,
+          as: "target",
+          attributes: ["id", "username", "createdAt"],
+        },
+        {
+          model: LinksModel,
+          as: "link",
+          attributes: ["id", "label", "link", "createdAt", "clickCount"],
+        },
+      ],
+    });
+
+    let relatedReport = [];
+
+    if (reports.type === "link") {
+      relatedReport = await ReportingModel.findAll({
+        where: { linkTarget: reports.linkTarget },
+      });
+    } else {
+      relatedReport = await ReportingModel.findAll({
+        where: {
+          [Op.and]: [{ userTarget: reports.userTarget }, { type: "user" }],
+        },
+      });
+    }
+
+    response.json({
+      success: true,
+      data: {
+        message: `fetch report detail done`,
+        report: reports,
+        relatedReport,
       },
     });
   } catch (error) {

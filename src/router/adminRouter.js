@@ -16,6 +16,7 @@ import {
   markReport,
   loadStats,
   loadLast5DayStats,
+  loadReportDetail,
 } from "../controller/adminController.js";
 
 const router = e.Router();
@@ -37,6 +38,7 @@ router.patch(
   markReport,
 );
 router.get("/reports", getReports);
+router.get("/reports/:id", loadReportDetail);
 
 router.post("/getStats", loadStats);
 router.post("/getRecentStats", loadLast5DayStats);
