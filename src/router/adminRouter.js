@@ -4,6 +4,7 @@ import { adminMiddleware } from "../middleware/adminMiddleware.js";
 import { inputValidationMiddleware } from "../middleware/inputValidationMiddleware.js";
 import { createNotificationSchema } from "../validation/createNotificationSchema.js";
 import { markSchema } from "../validation/markSchema.js";
+import { markActionSchema } from "../validation/markActionSchema.js";
 import {
   createNotification,
   fetchNotifications,
@@ -17,6 +18,7 @@ import {
   loadStats,
   loadLast5DayStats,
   loadReportDetail,
+  markDoneAndDeleteAction,
 } from "../controller/adminController.js";
 
 const router = e.Router();
@@ -36,6 +38,11 @@ router.patch(
   "/reports/mark/:id",
   inputValidationMiddleware(markSchema),
   markReport,
+);
+router.post(
+  "/reports/markAction/:id",
+  inputValidationMiddleware(markActionSchema),
+  markDoneAndDeleteAction,
 );
 router.get("/reports", getReports);
 router.get("/reports/:id", loadReportDetail);

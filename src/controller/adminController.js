@@ -3,6 +3,7 @@ import { LinksModel } from "../models/LinksModel.js";
 import { Sequelize, Op, fn, col } from "sequelize";
 import { ReportingModel } from "../models/ReportingModel.js";
 import { format } from "date-fns";
+import DB from "../config/database.js";
 
 export async function getUsers(request, response, next) {
   try {
@@ -124,9 +125,17 @@ export async function markReport(request, response, next) {
 }
 
 export async function getReports(request, response, next) {
+  const page = request.query.page || 1;
+  const limit = request.query.limit || 10;
+  const sort = request.query.sort || "DESC";
+  const sortBy = request.query.sortBy || "createdAt";
+  const offset = (page - 1) * limit;
+
   try {
-    const reports = await ReportingModel.findAll({
-      order: [["createdAt", "DESC"]],
+    const reports = await ReportingModel.findAndCountAll({
+      order: [[sortBy, sort]],
+      limit: limit,
+      offset: offset,
       include: [
         {
           model: UsersModel,
@@ -142,6 +151,7 @@ export async function getReports(request, response, next) {
           model: LinksModel,
           as: "link",
           attributes: ["id", "label", "link"],
+          required: false,
         },
       ],
     });
@@ -150,7 +160,11 @@ export async function getReports(request, response, next) {
       success: true,
       data: {
         message: `fetch reports done`,
-        reports,
+        reports: reports.rows,
+        limit: limit,
+        page: page,
+        totalPage: Math.ceil(reports.count / limit),
+        totalReport: reports.count,
       },
     });
   } catch (error) {
@@ -177,6 +191,7 @@ export async function loadReportDetail(request, response, next) {
           model: LinksModel,
           as: "link",
           attributes: ["id", "label", "link", "createdAt", "clickCount"],
+          required: false,
         },
       ],
     });
@@ -184,9 +199,11 @@ export async function loadReportDetail(request, response, next) {
     let relatedReport = [];
 
     if (reports.type === "link") {
-      relatedReport = await ReportingModel.findAll({
-        where: { linkTarget: reports.linkTarget },
-      });
+      if (reports.linkTarget) {
+        relatedReport = await ReportingModel.findAll({
+          where: { linkTarget: reports.linkTarget },
+        });
+      }
     } else {
       relatedReport = await ReportingModel.findAll({
         where: {
@@ -309,6 +326,38 @@ export async function loadLast5DayStats(request, response, next) {
       data: {
         message: `load last 5 day Stats done`,
         stats: Object.values(map),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function markDoneAndDeleteAction(request, response, next) {
+  try {
+    const { id } = request.params;
+    const { type, actionId } = request.body;
+
+    await DB.transaction(async (t) => {
+      await ReportingModel.update(
+        { markReview: "done" },
+        { where: { id: id }, transaction: t },
+      );
+
+      if (type === "link") {
+        await LinksModel.destroy({ where: { id: actionId }, transaction: t });
+      } else {
+        await UsersModel.update(
+          { active: false },
+          { where: { id: actionId }, transaction: t },
+        );
+      }
+    });
+
+    response.json({
+      success: true,
+      data: {
+        message: `report marked as done, ${type} has been ${type === "link" ? "deleted" : "blocked"}`,
       },
     });
   } catch (error) {
